@@ -140,7 +140,7 @@ class ModelCardsPagination:
         return
 
 class APIInformation():
-    baseUrl = "https://civitai.com"
+    baseUrl = "https://civitai.red"
     modelsApi = f"{baseUrl}/api/v1/models"
     imagesApi = f"{baseUrl}/api/v1/images"
     versionsAPI = f"{baseUrl}/api/v1/model-versions"
