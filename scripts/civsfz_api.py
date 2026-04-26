@@ -140,11 +140,6 @@ class ModelCardsPagination:
         return
 
 class APIInformation():
-    baseUrl = "https://civitai.red"
-    modelsApi = f"{baseUrl}/api/v1/models"
-    imagesApi = f"{baseUrl}/api/v1/images"
-    versionsAPI = f"{baseUrl}/api/v1/model-versions"
-    byHashAPI = f"{baseUrl}/api/v1/model-versions/by-hash"
     typeOptions:list = None
     sortOptions:list = None
     basemodelOptions:list = None
@@ -1074,9 +1069,10 @@ class CivitaiModels(APIInformation):
             metainfo = "_".join([f for f in meta.values() if isinstance(f, str)])
             pname = Path(filename)
             filename = pname.stem + "_" + metainfo + pname.suffix
-        # add version ID - ommit
+        # add version ID
+        vid = version["id"]
         pname = Path(filename)
-        filename = pname.stem + pname.suffix
+        filename = pname.stem + "_" + str(vid) + pname.suffix
         return filename_normalization(filename)
 
     def getUrlByIndex(self, fileIndex: int = None, versionIndex: int = None):

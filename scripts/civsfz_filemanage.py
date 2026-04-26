@@ -206,9 +206,7 @@ def filenameAddVID(filename, vid) -> str:
     if filename:
         pname = Path(filename)
         filename = pname.stem + "_" + str(vid) + pname.suffix
-    old_filename = filename
-    new_filename = filename_normalization(filename)
-    return new_filename
+    return filename_normalization(filename)
 
 
 def save_text_file(folder, filename, trained_words, description:str=""):
@@ -230,7 +228,7 @@ def save_text_file(folder, filename, trained_words, description:str=""):
     if not filepath.exists() or overwrite:
         with open(filepath, 'w', encoding='UTF-8') as f:
             f.write(trained_words)
-        print_n(f"Save [t] {filepath.name}")
+        print_n(f"Save {filepath.name}")
     else:
         print_n(f"File exists, so dosen't save {filepath.name}")
 
@@ -322,8 +320,8 @@ def saveImageFiles(folder, versionName, html, content_type, versionInfo):
                         if img_url == preview_url:
                             if filename != filenamethumb:
                                 shutil.copy2(os.path.join(folder, filename),
-                                             os.path.join(folder, filenamethumb))
-                        print_n(f"Save [i] {filename}")
+                                            os.path.join(folder, filenamethumb))
+                        print_n(f"Save {filename}")
                     # with urllib.request.urlretrieve(img_url, os.path.join(model_folder, filename)) as dl:
                 except requests.exceptions.Timeout as e:
                     print_ly(f'Error: {e}')
