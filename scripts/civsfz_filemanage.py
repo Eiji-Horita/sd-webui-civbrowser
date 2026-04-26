@@ -206,7 +206,9 @@ def filenameAddVID(filename, vid) -> str:
     if filename:
         pname = Path(filename)
         filename = pname.stem + "_" + str(vid) + pname.suffix
-    return filename_normalization(filename)
+    old_filename = filename
+    new_filename = filename_normalization(filename)
+    return new_filename
 
 
 def save_text_file(folder, filename, trained_words, description:str=""):
@@ -228,7 +230,7 @@ def save_text_file(folder, filename, trained_words, description:str=""):
     if not filepath.exists() or overwrite:
         with open(filepath, 'w', encoding='UTF-8') as f:
             f.write(trained_words)
-        print_n(f"Save {filepath.name}")
+        print_n(f"Save [t] {filepath.name}")
     else:
         print_n(f"File exists, so dosen't save {filepath.name}")
 
@@ -299,18 +301,13 @@ def saveImageFiles(folder, versionName, html, content_type, versionInfo):
                         isVideo = True
             # print(Fore.LIGHTYELLOW_EX + f'URL: {img_url}'+ Style.RESET_ALL)
             if isVideo:
-                if content_type == "TextualInversion":
-                    filename = f'{basename}_{i}.preview.webm'
-                    filenamethumb = f'{basename}.preview.webm'
-                else:
-                    filename = f'{basename}_{i}.webm'
-                    filenamethumb = f'{basename}.webm'
+                continue
             else:
                 if content_type == "TextualInversion":
-                    filename = f'{basename}_{i}.preview.png'
+                    filename = f'{basename}.preview.png'
                     filenamethumb = f'{basename}.preview.png'
                 else:
-                    filename = f'{basename}_{i}.png'
+                    filename = f'{basename}.png'
                     filenamethumb = f'{basename}.png'
 
             HTML = HTML.replace(img_url, f'"{filename}"')
@@ -323,9 +320,10 @@ def saveImageFiles(folder, versionName, html, content_type, versionInfo):
                     with open(os.path.join(folder, filename), 'wb') as f:
                         f.write(response.content)
                         if img_url == preview_url:
-                            shutil.copy2(os.path.join(folder, filename),
-                                        os.path.join(folder, filenamethumb))
-                        print_n(f"Save {filename}")
+                            if filename != filenamethumb:
+                                shutil.copy2(os.path.join(folder, filename),
+                                             os.path.join(folder, filenamethumb))
+                        print_n(f"Save [i] {filename}")
                     # with urllib.request.urlretrieve(img_url, os.path.join(model_folder, filename)) as dl:
                 except requests.exceptions.Timeout as e:
                     print_ly(f'Error: {e}')
@@ -334,15 +332,7 @@ def saveImageFiles(folder, versionName, html, content_type, versionInfo):
                 except requests.exceptions.RequestException as e:
                     print_ly(f'Error: {e}')
                     print_ly(f'URL: {img_url}')
-    filepath = os.path.join(folder, f'{basename}.html')
-    with open(filepath, 'wb') as f:
-        f.write(HTML.encode('utf8'))
-        print_n(f"Save {basename}.html")
-    # Save json_info
-    filepath = os.path.join(folder, f'{basename}.civitai.json')
-    with open(filepath, mode="w", encoding="utf-8") as f:
-        json.dump(versionInfo, f, indent=2, ensure_ascii=False)
-        print_n(f"Save {basename}.civitai.json")
+                break
     return "Save infos"
 
 def removeFile(file):
