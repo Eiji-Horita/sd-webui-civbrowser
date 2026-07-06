@@ -17,7 +17,13 @@ from scripts.civsfz_filemanage import (
     filename_normalization,
 )
 from scripts.civsfz_color import dictBasemodelColors
-from scripts.civsfz_shared import GR_V440, opts, read_timeout, card_no_preview
+from scripts.civsfz_shared import (
+    GR_V440,
+    opts,
+    read_timeout,
+    card_no_preview,
+    get_proxies,
+)
 from jinja2 import Environment, FileSystemLoader
 
 print_ly = lambda  x: print(Fore.LIGHTYELLOW_EX + "CivBrowser: " + x + Style.RESET_ALL )
@@ -33,13 +39,14 @@ environment = Environment(
 
 class Browser:
     session = None
-    
+
     def __init__(self):
         if Browser.session is None:
             Browser.session = requests.Session()
+        Browser.session.proxies, Browser.session.auth = get_proxies()
         Browser.session.headers.update(
             {'User-Agent': r'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0'})
-        #self.setAPIKey("")
+        # self.setAPIKey("")
     def __enter__(self):
         return Browser.session
     def __exit__(self):
@@ -164,7 +171,7 @@ class APIInformation():
     def __init__(self) -> None:
         if APIInformation.typeOptions is None:
             self.getOptions()
-    #def setBaseUrl(self,url:str):
+    # def setBaseUrl(self,url:str):
     #    APIInformation.baseUrl = url
     def getBaseUrl(self) -> str:
         baseUrl = getattr(opts, "civsfz_api_root_url", "https://civitai.com")
@@ -221,17 +228,25 @@ class APIInformation():
             )
             # print_lc(f'Page cache: {response.headers["CF-Cache-Status"]}')
             response.raise_for_status()
+        except requests.exceptions.ProxyError as e:
+            print(f"Proxy Error. {(e)}")
+            data = ""
         except requests.exceptions.RequestException as e:
             # print(f"{(response.status_code)=}")
-            if response.status_code == 400: # Bad Request
-                # expected under normal conditions
-                response.encoding = "utf-8"
-                data = (
-                json.loads(response.text)
-            )
+            data = ""
+            if e.response is not None:
+                if response.status_code == 400: # Bad Request
+                    # expected under normal conditions
+                    response.encoding = "utf-8"
+                    data = (
+                    json.loads(response.text)
+                    )
+                elif response.status_code == 407:
+                    print_ly("Proxy authentication failed.")
+                else:
+                    print_ly("Civitai is down.")
             else:
-                data = ""
-                print_ly("Civitai server may be down or under maintenance.")
+                print_ly("Unable to connect to Civitai.")
         else:
             data = ""
         # Check the status code of the response
@@ -308,22 +323,30 @@ class APIInformation():
             "Flux.2 Klein 9B-base",
             "Flux.2 Klein 4B",
             "Flux.2 Klein 4B-base",
+            "Grok",
+            "HappyHorse",
             "HiDream",
+            "HiDream-O1",
             "Hunyuan 1",
             "Hunyuan Video",
+            "Ideogram 4.0",
+            "Boogu",
             "Illustrious",
             "Imagen4",
-            "Kling",
             "Kolors",
+            "Krea 2",
             "LTXV",
             "LTXV2",
             "LTXV 2.3",
+            "Lens",
             "Lumina",
+            "MAI",
             "Mochi",
             "Nano Banana",
             "NoobAI",
             "ODOR",
             "OpenAI",
+            "Upscaler",
             "Other",
             "PixArt a",
             "PixArt E",
@@ -331,6 +354,7 @@ class APIInformation():
             "Pony",
             "Pony V7",
             "Qwen",
+            "Qwen 2",
             "Stable Cascade",
             "SD 1.4",
             "SD 1.5",
@@ -346,7 +370,6 @@ class APIInformation():
             "SD 3.5 Large",
             "SD 3.5 Large Turbo",
             "SD 3.5 Medium",
-            "Sora 2",
             "SDXL 0.9",
             "SDXL 1.0",
             "SDXL 1.0 LCM",
@@ -354,12 +377,11 @@ class APIInformation():
             "SDXL Hyper",
             "SDXL Turbo",
             "SDXL Distilled",
-            "Seedance",
             "Seedream",
             "SVD",
             "SVD XT",
+            "Sora 2",
             "Veo 3",
-            "Vidu Q1",
             "Wan Video",
             "Wan Video 1.3B t2v",
             "Wan Video 14B t2v",
@@ -370,8 +392,16 @@ class APIInformation():
             "Wan Video 2.2 T2V-A14B",
             "Wan Video 2.5 T2V",
             "Wan Video 2.5 I2V",
+            "Wan Image 2.7",
+            "Wan Video 2.7",
             "ZImageTurbo",
             "ZImageBase",
+            "Vidu Q1",
+            "Hailuo by MiniMax",
+            "Kling",
+            "Seedance",
+            "ACE Audio",
+            "PolyGen",
         ]
         try:
             # APIInformation.basemodelOptions = data['error']['issues'][0]['unionErrors'][0]['issues'][0]['options']
@@ -1072,7 +1102,8 @@ class CivitaiModels(APIInformation):
         # add version ID
         vid = version["id"]
         pname = Path(filename)
-        filename = pname.stem + "_" + str(vid) + pname.suffix
+#        filename = pname.stem + "_" + str(vid) + pname.suffix
+        filename = pname.stem + pname.suffix
         return filename_normalization(filename)
 
     def getUrlByIndex(self, fileIndex: int = None, versionIndex: int = None):
@@ -1477,6 +1508,10 @@ class CivitaiModels(APIInformation):
             # print_lc(f'{response.url=}')
             # print_lc(f'Page cache: {response.headers["CF-Cache-Status"]}')
             response.raise_for_status()
+        except requests.exceptions.ProxyError as e:
+            print_ly("Proxy Error.")
+            data = self.jsonData  # No update data
+            self.requestError = e
         except requests.exceptions.RequestException as e:
             # print(Fore.LIGHTYELLOW_EX + "Request error: " , e)
             # print(Style.RESET_ALL)

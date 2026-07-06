@@ -35,6 +35,9 @@ An extension to help download models from CivitAi without leaving WebUI
 - Stores metadata.
   - Create description and activation text from model information.
   - If metadata already exists, it will not be overwritten. Can be changed in settings.
+- Proxy support (experimental >=v2.15).
+  - Please be advised that your credentials are stored in plain text within the config.json file.
+  - The proxy server is specified in `Settings` > `CivBrowser` > `Proxy`. If no value is provided, the `HTTP_PROXY` and `HTTPS_PROXY` environment variables are used instead.
 
 ## Installation
 
@@ -50,6 +53,11 @@ An extension to help download models from CivitAi without leaving WebUI
 10. Restart SD-webUI.
 
 ## Versions
+
+### v2.15
+
+- Added proxy support! You can configure it in Settings. It's not fully debugged yet, though, so please let me know how it works for you!
+- The proxy server is specified in `Settings` > `CivBrowser` > `Proxy`. If no value is provided, the `HTTP_PROXY` and `HTTPS_PROXY` environment variables are used instead.
 
 ### v2.14
 

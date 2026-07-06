@@ -10,7 +10,7 @@ import subprocess as sp
 from collections import deque
 from modules import  sd_models
 from colorama import Fore, Back, Style
-from scripts.civsfz_shared import cmd_opts, opts, read_timeout
+from scripts.civsfz_shared import cmd_opts, opts, read_timeout, get_proxies
 from modules.paths import models_path
 try:
     from send2trash import send2trash
@@ -205,7 +205,8 @@ def filename_normalization(filename) -> str:
 def filenameAddVID(filename, vid) -> str:
     if filename:
         pname = Path(filename)
-        filename = pname.stem + "_" + str(vid) + pname.suffix
+#        filename = pname.stem + "_" + str(vid) + pname.suffix
+        filename = pname.stem + pname.suffix
     return filename_normalization(filename)
 
 
@@ -288,6 +289,7 @@ def saveImageFiles(folder, versionName, html, content_type, versionInfo):
                 preview_url = urllib.parse.quote(preview_url,  safe=':/=')
                 break
     with requests.Session() as session:
+        session.proxies, session.auth = get_proxies()
         HTML = html
         for i, img_url in enumerate(img_urls):
             isVideo = False
@@ -323,6 +325,8 @@ def saveImageFiles(folder, versionName, html, content_type, versionInfo):
                                             os.path.join(folder, filenamethumb))
                         print_n(f"Save {filename}")
                     # with urllib.request.urlretrieve(img_url, os.path.join(model_folder, filename)) as dl:
+                except requests.exceptions.ProxyError as e:
+                    print_ly("Proxy Error.")
                 except requests.exceptions.Timeout as e:
                     print_ly(f'Error: {e}')
                     print_ly(f'URL: {img_url}')
@@ -330,7 +334,15 @@ def saveImageFiles(folder, versionName, html, content_type, versionInfo):
                 except requests.exceptions.RequestException as e:
                     print_ly(f'Error: {e}')
                     print_ly(f'URL: {img_url}')
-                break
+    filepath = os.path.join(folder, f'{basename}.html')
+    with open(filepath, 'wb') as f:
+        f.write(HTML.encode('utf8'))
+        print_n(f"Save {basename}.html")
+    # Save json_info
+    filepath = os.path.join(folder, f'{basename}.civitai.json')
+    with open(filepath, mode="w", encoding="utf-8") as f:
+        json.dump(versionInfo, f, indent=2, ensure_ascii=False)
+        print_n(f"Save {basename}.civitai.json")
     return "Save infos"
 
 def removeFile(file):

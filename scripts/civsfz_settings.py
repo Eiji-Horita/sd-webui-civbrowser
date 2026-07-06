@@ -61,9 +61,15 @@ def on_ui_settings():
             "https://civitai.com",
             label="API Root URL",
             component=gr.Radio,
-            component_args={
-                "choices": ["https://civitai.com", "https://civitai.red"]
-            },
+            component_args={"choices": ["https://civitai.com", "https://civitai.red"]},
+        ),
+        "civsfz_proxy": shared.OptionInfo(
+            "",
+            label="Proxy",
+            component=gr.Textbox,
+            component_args={"placeholder": "http://user:password@host:port"},
+        ).info(
+            "Please note that authentication credentials are stored within the config.json file."
         ),
         "civsfz_api_key": shared.OptionInfo(
             "",
