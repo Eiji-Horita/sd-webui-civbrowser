@@ -1007,7 +1007,7 @@ class Components():
                 )
 
             def checkEarlyAccess(grTxtEarlyAccess):
-                return gr.Textbox.update(value="" if grTxtEarlyAccess == "" else "Early Access")
+                #return gr.Textbox.update(value="" if grTxtEarlyAccess == "" else "Early Access")
                 msg = ""
                 if grTxtEarlyAccess != "":
                     dtPub = self.Civitai.getPublishedDatetime()
@@ -1350,9 +1350,10 @@ def on_ui_tabs():
         with gr.Accordion(label="Update information", open=False):
             gr.HTML(
                 value=(
-                    "<h3>Changes " + "in v2.15" + "</h3>"
+                    "<h3>Changes " + "in v2.17" + "</h3>"
                     "<ul>"
-                    "<li>Added proxy support! You can configure it in Settings. It's not fully debugged yet, though, so please let me know how it works for you!</li>"
+                    "<li>Handle change in allowCommercialUse data type in API response (now a list).</li>"
+                    "<li>Update model permission display to match Civitai.</li>"
                     "</ul>"
                     "<div>For more information, please click <a href='https://github.com/SignalFlagZ/sd-webui-civbrowser'>here(CivBrowser|GitHub)]'</a></div>"
                 )

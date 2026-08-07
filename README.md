@@ -54,8 +54,22 @@ An extension to help download models from CivitAi without leaving WebUI
 
 ## Versions
 
+### v2.17
+
+- Handle change in allowCommercialUse data type in API response (now a list).
+- Update model permission display to match Civitai.
+- Fix Early Access model recognition and add remaining time display.
+
+### v2.16
+
+- Remove 'If the first image is of type "X", treat the model as nsfw' setting.
+- Fixed an issue where sample image metadata would not appear.
+  - Fetch sample image metadata from version ID API
+- Verify query param updates by enums API
+
 ### v2.15
 
+- Add HTTP error handling during download (experimental)
 - Added proxy support! You can configure it in Settings. It's not fully debugged yet, though, so please let me know how it works for you!
 - The proxy server is specified in `Settings` > `CivBrowser` > `Proxy`. If no value is provided, the `HTTP_PROXY` and `HTTPS_PROXY` environment variables are used instead.
 

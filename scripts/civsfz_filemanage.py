@@ -291,6 +291,7 @@ def saveImageFiles(folder, versionName, html, content_type, versionInfo):
     with requests.Session() as session:
         session.proxies, session.auth = get_proxies()
         HTML = html
+        img_cntr = 0
         for i, img_url in enumerate(img_urls):
             isVideo = False
             filename = ""
@@ -303,6 +304,7 @@ def saveImageFiles(folder, versionName, html, content_type, versionInfo):
             if isVideo:
                 continue
             else:
+                img_cntr = img_cntr + 1
                 if content_type == "TextualInversion":
                     filename = f'{basename}.preview.png'
                     filenamethumb = f'{basename}.preview.png'
@@ -334,6 +336,7 @@ def saveImageFiles(folder, versionName, html, content_type, versionInfo):
                 except requests.exceptions.RequestException as e:
                     print_ly(f'Error: {e}')
                     print_ly(f'URL: {img_url}')
+            break
     filepath = os.path.join(folder, f'{basename}.html')
     with open(filepath, 'wb') as f:
         f.write(HTML.encode('utf8'))
