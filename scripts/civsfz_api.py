@@ -187,6 +187,7 @@ class APIInformation():
             "Poses",
             "Wildcards",
             "Workflows",
+            "ComfyWorkflows",
             "Detection",
             "VisionLanguage",
             "CLIP",
@@ -227,6 +228,7 @@ class APIInformation():
             "Flux.2 Klein 9B-base",
             "Flux.2 Klein 4B",
             "Flux.2 Klein 4B-base",
+            "Flux 3 Video",
             "Grok",
             "HappyHorse",
             "HiDream",
@@ -241,6 +243,7 @@ class APIInformation():
             "LTXV",
             "LTXV2",
             "LTXV 2.3",
+            "LTXV 2.5",
             "Lens",
             "Lumina",
             "MageFlow",
@@ -255,6 +258,7 @@ class APIInformation():
             "Pony V7",
             "Qwen",
             "Qwen 2",
+            "Qwen 3",
             "SD 1.4",
             "SD 1.5",
             "SD 1.5 LCM",
@@ -278,6 +282,7 @@ class APIInformation():
             "Wan Video 2.7",
             "ZImageTurbo",
             "ZImageBase",
+            "MiniMax H3",
             "ACE Audio",
         ],
         "BaseModel": [
@@ -295,6 +300,7 @@ class APIInformation():
             "Flux.2 Klein 9B-base",
             "Flux.2 Klein 4B",
             "Flux.2 Klein 4B-base",
+            "Flux 3 Video",
             "Grok",
             "HappyHorse",
             "HiDream",
@@ -310,6 +316,7 @@ class APIInformation():
             "LTXV",
             "LTXV2",
             "LTXV 2.3",
+            "LTXV 2.5",
             "Lens",
             "Lumina",
             "MageFlow",
@@ -328,6 +335,7 @@ class APIInformation():
             "Pony V7",
             "Qwen",
             "Qwen 2",
+            "Qwen 3",
             "Stable Cascade",
             "SD 1.4",
             "SD 1.5",
@@ -371,7 +379,7 @@ class APIInformation():
             "ZImageTurbo",
             "ZImageBase",
             "Vidu Q1",
-            "MiniMax",
+            "MiniMax H3",
             "Kling",
             "Seedance",
             "ACE Audio",
@@ -809,7 +817,10 @@ class CivitaiModels(APIInformation):
     def getModelVersionsList(self) -> list:
         '''Return modelVersions list. Select item before.'''
         self.getModelVersionsInfo()
-        return [(item["name"], i) for i, item in enumerate(self.versionsInfo)]
+        return [
+            (item["name"] + "⚡️" if item["earlyAccess"] else item["name"], i)
+            for i, item in enumerate(self.versionsInfo)
+        ]
         # versionNames = []
         # if self.modelIndex is None:
         #     print_ly('Select item first.')
@@ -835,6 +846,7 @@ class CivitaiModels(APIInformation):
                 {
                     "name": l1["name"],
                     "base_model": l1["baseModel"],
+                    "earlyAccess": "earlyAccessDeadline" in l1,
                     "have": l2,
                 }
                 for l1,l2 in zip(item["modelVersions"], hasVersions)
@@ -915,7 +927,7 @@ class CivitaiModels(APIInformation):
     def getSelectedVersionEarlyAccessDeadline(self):
         if 'earlyAccessDeadline' in self.jsonData['items'][self.modelIndex]['modelVersions'][self.versionIndex]:
             return self.jsonData['items'][self.modelIndex]['modelVersions'][self.versionIndex]['earlyAccessDeadline']
-        #if self.jsonData['items'][self.modelIndex]['modelVersions'][self.versionIndex]['availability'] == "EarlyAccess":
+        # if self.jsonData['items'][self.modelIndex]['modelVersions'][self.versionIndex]['availability'] == "EarlyAccess":
         #    return "EA"
         else:
             return ""
@@ -1243,8 +1255,7 @@ class CivitaiModels(APIInformation):
         # add version ID
         vid = version["id"]
         pname = Path(filename)
-#        filename = pname.stem + "_" + str(vid) + pname.suffix
-        filename = pname.stem + pname.suffix
+        filename = pname.stem + "_" + str(vid) + pname.suffix
         return filename_normalization(filename)
 
     def getUrlByIndex(self, fileIndex: int = None, versionIndex: int = None):
@@ -1485,7 +1496,7 @@ class CivitaiModels(APIInformation):
         tmpList:list = []
         for key, value in infotextDict.items():
             if not key in ('Prompt','Negative prompt'):
-                tmpList.append("{}:{}".format(key,value))
+                tmpList.append(r"{}:{}".format(key,value))
         infotext += ",".join(tmpList)
         return infotext
 
@@ -1496,9 +1507,10 @@ class CivitaiModels(APIInformation):
             if self.matchLevel(pic['nsfwLevel'], nsfwLevel):
                 nsfw = pic['nsfwLevel'] > 1 and not self.showNsfw
                 infotext = ""
+                metaHtml = ""
                 if 'meta' in pic:
                     infotext = self.meta2infotext(pic['meta']) if pic['meta'] is not None else ""
-                metaHtml = self.meta2html(pic['meta']) if pic['meta'] is not None else ""
+                    metaHtml = self.meta2html(pic['meta']) if pic['meta'] is not None else ""
                 template = environment.get_template("sampleImage.jinja")
                 samples += template.render(
                     pic=pic,
@@ -1574,7 +1586,8 @@ class CivitaiModels(APIInformation):
             grDrpdwnUserName="",
             grDrpdwnTag="",
             grDrpdwnID="",
-            grchkbxfav=""
+            grchkbxfav=False,
+            grchkbxEA=False,
         ):
         if grDrpdwnID is not None:
             grDrpdwnID = str.strip(grDrpdwnID)
@@ -1611,6 +1624,8 @@ class CivitaiModels(APIInformation):
                 query |= {'baseModels': base_models }
             if grchkbxfav:
                 query |= {"favorites": grchkbxfav}
+            if grchkbxEA:
+                query |= {"earlyAccess": grchkbxEA}
         return query
 
     def updateQuery(self, url:str , addQuery:dict) -> str:

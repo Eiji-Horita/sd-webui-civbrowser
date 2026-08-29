@@ -98,11 +98,11 @@ def type_path(type: str) -> Path:
         default = cmd_opts.lora_dir  # "models/Lora"
         folder = os.path.relpath(default, base)
     elif type == "LoCon":
-        #if "lyco_dir" in cmd_opts:
+        # if "lyco_dir" in cmd_opts:
         #    default = f"{cmd_opts.lyco_dir}"
-        #elif "lyco_dir_backcompat" in cmd_opts:  # A1111 V1.5.1
+        # elif "lyco_dir_backcompat" in cmd_opts:  # A1111 V1.5.1
         #    default = f"{cmd_opts.lyco_dir_backcompat}"
-        #else:
+        # else:
         default = os.path.join(models_path, "Lora/_LyCORIS")
         folder = os.path.relpath(default, base)
     elif type == "DoRA":
@@ -116,20 +116,8 @@ def type_path(type: str) -> Path:
         folder = os.path.relpath(default, base)
     elif type == "Controlnet":
         folder = "ControlNet"
-    elif type == "Poses":
-        folder = "OtherModels/Poses"
-    elif type == "Upscaler":
-        folder = "OtherModels/Upscaler"
-    elif type == "MotionModule":
-        folder = "OtherModels/MotionModule"
-    elif type == "Wildcards":
-        folder = "OtherModels/Wildcards"
-    elif type == "Workflows":
-        folder = "OtherModels/Workflows"
-    elif type == "Detection":
-        folder = "OtherModels/Detection"
-    elif type == "Other":
-        folder = "OtherModels/Other"
+    else:
+        folder = f"OtherModels/{type}"
 
     optFolder = folderSetting.get(type, "")
     if optFolder == "":
@@ -205,8 +193,7 @@ def filename_normalization(filename) -> str:
 def filenameAddVID(filename, vid) -> str:
     if filename:
         pname = Path(filename)
-#        filename = pname.stem + "_" + str(vid) + pname.suffix
-        filename = pname.stem + pname.suffix
+        filename = pname.stem + "_" + str(vid) + pname.suffix
     return filename_normalization(filename)
 
 
@@ -291,7 +278,6 @@ def saveImageFiles(folder, versionName, html, content_type, versionInfo):
     with requests.Session() as session:
         session.proxies, session.auth = get_proxies()
         HTML = html
-        img_cntr = 0
         for i, img_url in enumerate(img_urls):
             isVideo = False
             filename = ""
@@ -302,14 +288,18 @@ def saveImageFiles(folder, versionName, html, content_type, versionInfo):
                         isVideo = True
             # print(Fore.LIGHTYELLOW_EX + f'URL: {img_url}'+ Style.RESET_ALL)
             if isVideo:
-                continue
-            else:
-                img_cntr = img_cntr + 1
                 if content_type == "TextualInversion":
-                    filename = f'{basename}.preview.png'
+                    filename = f'{basename}_{i}.preview.webm'
+                    filenamethumb = f'{basename}.preview.webm'
+                else:
+                    filename = f'{basename}_{i}.webm'
+                    filenamethumb = f'{basename}.webm'
+            else:
+                if content_type == "TextualInversion":
+                    filename = f'{basename}_{i}.preview.png'
                     filenamethumb = f'{basename}.preview.png'
                 else:
-                    filename = f'{basename}.png'
+                    filename = f'{basename}_{i}.png'
                     filenamethumb = f'{basename}.png'
 
             HTML = HTML.replace(img_url, f'"{filename}"')
@@ -322,9 +312,8 @@ def saveImageFiles(folder, versionName, html, content_type, versionInfo):
                     with open(os.path.join(folder, filename), 'wb') as f:
                         f.write(response.content)
                         if img_url == preview_url:
-                            if filename != filenamethumb:
-                                shutil.copy2(os.path.join(folder, filename),
-                                            os.path.join(folder, filenamethumb))
+                            shutil.copy2(os.path.join(folder, filename),
+                                        os.path.join(folder, filenamethumb))
                         print_n(f"Save {filename}")
                     # with urllib.request.urlretrieve(img_url, os.path.join(model_folder, filename)) as dl:
                 except requests.exceptions.ProxyError as e:
@@ -336,7 +325,6 @@ def saveImageFiles(folder, versionName, html, content_type, versionInfo):
                 except requests.exceptions.RequestException as e:
                     print_ly(f'Error: {e}')
                     print_ly(f'URL: {img_url}')
-            break
     filepath = os.path.join(folder, f'{basename}.html')
     with open(filepath, 'wb') as f:
         f.write(HTML.encode('utf8'))

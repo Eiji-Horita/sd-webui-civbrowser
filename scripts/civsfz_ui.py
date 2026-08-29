@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from modules import script_callbacks, ui_components
 from colorama import Fore, Back, Style
 from scripts.civsfz_shared import VERSION, GR_V440, cmd_opts, opts, read_timeout, HTML2txt
-from scripts.civsfz_api import CivitaiModels
+from scripts.civsfz_api import CivitaiModels, environment
 from scripts.civsfz_filemanage import (
     open_folder,
     HistoryS,
@@ -93,25 +93,32 @@ class Components():
             #    )
             with gr.Row():
                 grChkbxgrpSearch = gr.CheckboxGroup(
-                    scale=3,
-                    label="Search (Keyword:Spaces as OR-search, double‑quotes as a phrase)",
+                    scale=4,
+                    label="Search",
                     choices=self.Civitai.getSearchTypes(),
                     value=self.searchtype,
                     interactive=True,
                     elem_id=f"civsfz_search_type{self.id}",
                     tooltip="Keyword, username and tag can be searched simultaneously",
                 )
+                grchkbxEA = gr.Checkbox(
+                    scale=1,
+                    label="Early Access",
+                    value=False,
+                    elem_id=f"civsfz_search_ea{self.id}",
+                    tooltip="Search for Early Access models",
+                )
                 grchkbxfav = gr.Checkbox(
                     scale=1,
-                    label="Liked on Civitai",
+                    label="Favorites",
                     value=False,
                     elem_id=f"civsfz_search_liked{self.id}",
-                    tooltip="Search for models liked on civitai",
+                    tooltip="Search for favorites models",
                 )
             with gr.Row():
                 grDrpdwnKeyword = gr.Dropdown(
                     scale=0,
-                    label="Keyword",
+                    label="Keyword (Spaces as OR-search, double‑quotes as a phrase)",
                     choices=HistoryKwd.getAsChoices("Keyword"),
                     type="value",
                     visible=False,
@@ -154,7 +161,7 @@ class Components():
                 with gr.Row(elem_id=f"civsfz_apicontrol{self.id}", elem_classes="civsfz-navigation-buttons civsfz-sticky-element"):
                     with gr.Column(scale=3):
                         grBtnGetListAPI = gr.Button(
-                            value="GET cards",
+                            value="GET cards",variant="primary",
                             elem_id=f"civsfz_get_cards{self.id}",
                             tooltip="Get model list and display as model cards",
                         )
@@ -200,7 +207,7 @@ class Components():
                         with gr.Row():
                             # grBtnSaveText = gr.Button(value="Save trained tags",interactive=False, min_width=80)
                             grBtnSaveImages = gr.Button(
-                                value="Save model infos",
+                                value="Save model infos",variant="primary",
                                 elem_id=f"civsfz_save_images{self.id}",
                                 tooltip="Save model information. Model file is not saved.",
                                 interactive=False,
@@ -208,6 +215,7 @@ class Components():
                             )
                             grBtnDownloadModel = gr.Button(
                                 value="Download model",
+                                variant="primary",
                                 elem_id=f"civsfz_downloadbutton{self.id}",
                                 tooltip="Save model file",
                                 interactive=False,
@@ -696,6 +704,7 @@ class Components():
                 grDrpdwnTag,
                 grDrpdwnID,
                 grchkbxfav,
+                grchkbxEA,
             ):
                 if grDrpdwnID is not None: grDrpdwnID = str.strip(grDrpdwnID) # Remove spaces
                 response = None
@@ -713,6 +722,7 @@ class Components():
                     grDrpdwnTag,
                     grDrpdwnID,
                     grchkbxfav,
+                    grchkbxEA,
                 )
                 # print_lc(f"{query=}")
                 if query == "":
@@ -851,6 +861,7 @@ class Components():
                     grDrpdwnTag,
                     grDrpdwnID,
                     grchkbxfav,
+                    grchkbxEA,
                 ],
                 outputs=[
                     grHtmlModelName,
@@ -1007,7 +1018,7 @@ class Components():
                 )
 
             def checkEarlyAccess(grTxtEarlyAccess):
-                #return gr.Textbox.update(value="" if grTxtEarlyAccess == "" else "Early Access")
+                # return gr.Textbox.update(value="" if grTxtEarlyAccess == "" else "Early Access")
                 msg = ""
                 if grTxtEarlyAccess != "":
                     dtPub = self.Civitai.getPublishedDatetime()
@@ -1312,30 +1323,13 @@ class Components():
         return self.components
 
     def compAnchorNav(self):
-        value = (
-            f"<div onclick='civsfz_scroll_to(\"#civsfz_tab-element\",0);'>"
-            # "<span style='font-size:200%;color:transparent;text-shadow:0 0 0 orange;cursor: pointer;pointer-events: auto;'>🔝</span>"
-            "<span style='font-size:200%;cursor: pointer;pointer-events: auto;'>🔍️</span>"
-            "</div>"
-            f"<div onclick='civsfz_scroll_to(\"#civsfz_model-navigation{self.id}\");'>"
-            "<span style='font-size:200%;cursor: pointer;pointer-events: auto;'>📚</span>"
-            "</div>"
-            f"<div onclick='civsfz_scroll_to(\"#civsfz_model-data{self.id}\");'>"
-            "<span style='font-size:200%;cursor: pointer;pointer-events: auto;'>📥</span>"
-            "</div>"
-            f"<div onclick='civsfz_scroll_to(\"#civsfz-model-description{self.id}\",-100);'>"
-            "<span style='font-size:200%;cursor: pointer;pointer-events: auto;'>🧾</span>"
-            "</div>"
-            f"<div onclick='civsfz_scroll_to(\"#civsfz-sample-images{self.id}\",-100);'>"
-            "<span style='font-size:200%;cursor: pointer;pointer-events: auto;'>🏞️</span>"
-            "</div>"
-            f"<div style='transform:rotate(-90deg);' onclick='civsfz_scroll_to(\"#civsfz-version\",-100);'>"
-            "<span style='font-size:200%;color:transparent;text-shadow:0 0 0 orange;cursor: pointer;pointer-events: auto;'>🔚</span>"
-            "</div>"
+        template = environment.get_template("anchorNav.jinja")
+        html = template.render(
+            id = self.id,
         )
         grHtmlAnchorNav = gr.HTML(
             elem_classes="civsfz-anchor-nav",
-            value=value,
+            value=html,
         )
         return grHtmlAnchorNav
 
@@ -1370,7 +1364,7 @@ def on_ui_tabs():
             with gr.Tab(
                 label="Download Status",
                 id=f"Download Status",
-                elem_id=f"Download Status",
+                elem_id=f"Download-Status",
                 elem_classes="civsfz-tab-item",
             ):
                 with gr.Column():
