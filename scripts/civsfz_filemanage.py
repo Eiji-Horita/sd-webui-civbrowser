@@ -193,7 +193,7 @@ def filename_normalization(filename) -> str:
 def filenameAddVID(filename, vid) -> str:
     if filename:
         pname = Path(filename)
-        filename = pname.stem + "_" + str(vid) + pname.suffix
+        filename = pname.stem + pname.suffix
     return filename_normalization(filename)
 
 
@@ -278,6 +278,7 @@ def saveImageFiles(folder, versionName, html, content_type, versionInfo):
     with requests.Session() as session:
         session.proxies, session.auth = get_proxies()
         HTML = html
+        img_cntr = 0
         for i, img_url in enumerate(img_urls):
             isVideo = False
             filename = ""
@@ -288,18 +289,14 @@ def saveImageFiles(folder, versionName, html, content_type, versionInfo):
                         isVideo = True
             # print(Fore.LIGHTYELLOW_EX + f'URL: {img_url}'+ Style.RESET_ALL)
             if isVideo:
-                if content_type == "TextualInversion":
-                    filename = f'{basename}_{i}.preview.webm'
-                    filenamethumb = f'{basename}.preview.webm'
-                else:
-                    filename = f'{basename}_{i}.webm'
-                    filenamethumb = f'{basename}.webm'
+                continue
             else:
+                img_cntr = img_cntr + 1
                 if content_type == "TextualInversion":
-                    filename = f'{basename}_{i}.preview.png'
+                    filename = f'{basename}.preview.png'
                     filenamethumb = f'{basename}.preview.png'
                 else:
-                    filename = f'{basename}_{i}.png'
+                    filename = f'{basename}.png'
                     filenamethumb = f'{basename}.png'
 
             HTML = HTML.replace(img_url, f'"{filename}"')
@@ -312,8 +309,9 @@ def saveImageFiles(folder, versionName, html, content_type, versionInfo):
                     with open(os.path.join(folder, filename), 'wb') as f:
                         f.write(response.content)
                         if img_url == preview_url:
-                            shutil.copy2(os.path.join(folder, filename),
-                                        os.path.join(folder, filenamethumb))
+                            if filename != filenamethumb:
+                                shutil.copy2(os.path.join(folder, filename),
+                                            os.path.join(folder, filenamethumb))
                         print_n(f"Save {filename}")
                     # with urllib.request.urlretrieve(img_url, os.path.join(model_folder, filename)) as dl:
                 except requests.exceptions.ProxyError as e:
@@ -325,6 +323,7 @@ def saveImageFiles(folder, versionName, html, content_type, versionInfo):
                 except requests.exceptions.RequestException as e:
                     print_ly(f'Error: {e}')
                     print_ly(f'URL: {img_url}')
+            break
     filepath = os.path.join(folder, f'{basename}.html')
     with open(filepath, 'wb') as f:
         f.write(HTML.encode('utf8'))

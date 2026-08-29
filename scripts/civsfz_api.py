@@ -1255,7 +1255,7 @@ class CivitaiModels(APIInformation):
         # add version ID
         vid = version["id"]
         pname = Path(filename)
-        filename = pname.stem + "_" + str(vid) + pname.suffix
+        filename = pname.stem + pname.suffix
         return filename_normalization(filename)
 
     def getUrlByIndex(self, fileIndex: int = None, versionIndex: int = None):
