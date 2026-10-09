@@ -45,7 +45,7 @@ familyColor: dict = {
             "SDXL Hyper",
             "SDXL Turbo",
         ],
-        "color": hex_color_hsl_to_rgb(15, 100, 45),
+        "color": hex_color_hsl_to_rgb(350, 80, 50),
     },
     "family2": {
         "value": [
@@ -54,7 +54,7 @@ familyColor: dict = {
             "ZImageTurbo",
             "ZImageBase",
         ],
-        "color": hex_color_hsl_to_rgb(261, 100, 50),
+        "color": hex_color_hsl_to_rgb(260, 80, 50),
     },
     "family3": {
         "value": [
@@ -70,7 +70,7 @@ familyColor: dict = {
             "Wan Video 1.3B t2v",
             "Wan Video",
         ],
-        "color": hex_color_hsl_to_rgb(140, 90, 30),
+        "color": hex_color_hsl_to_rgb(120, 80, 30),
     },
     "family4": {
         "value": [
@@ -80,7 +80,7 @@ familyColor: dict = {
             "LTXV2",
             "LTXV",
         ],
-        "color": hex_color_hsl_to_rgb(300, 90, 45),
+        "color": hex_color_hsl_to_rgb(170, 80, 40),
     },
     "family5": {
         "value": [
@@ -96,11 +96,11 @@ familyColor: dict = {
             "Flux.1 D",
             "Flux.1 S",
         ],
-        "color": hex_color_hsl_to_rgb(279, 38, 48),
+        "color": hex_color_hsl_to_rgb(320, 80, 50),
     },
     "family6": {
         "value": [],
-        "color": hex_color_hsl_to_rgb(330, 90, 45),
+        "color": hex_color_hsl_to_rgb(290, 80, 50),
     },
     "non_family": {
         "value": [],
