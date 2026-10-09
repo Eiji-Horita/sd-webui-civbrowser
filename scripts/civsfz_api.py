@@ -229,6 +229,7 @@ class APIInformation():
             "Flux.2 Klein 9B-base",
             "Flux.2 Klein 4B",
             "Flux.2 Klein 4B-base",
+            "Flux.3",
             "Flux 3 Video",
             "Grok",
             "HappyHorse",
@@ -259,6 +260,7 @@ class APIInformation():
             "Pony V7",
             "Qwen",
             "Qwen 2",
+            "Qwen 2.1",
             "Qwen 3",
             "SD 1.4",
             "SD 1.5",
@@ -285,9 +287,12 @@ class APIInformation():
             "Wan Video 3.0",
             "ZImageTurbo",
             "ZImageBase",
+            "Ming Image Design 0.1",
+            "Ming Image Design Layer 0.1",
             "MiniMax H3",
             "ACE Audio",
             "MiniMax Music 3",
+            "Sonilo",
         ],
         "BaseModel": [
             "Anima",
@@ -304,6 +309,7 @@ class APIInformation():
             "Flux.2 Klein 9B-base",
             "Flux.2 Klein 4B",
             "Flux.2 Klein 4B-base",
+            "Flux.3",
             "Flux 3 Video",
             "Grok",
             "HappyHorse",
@@ -312,6 +318,7 @@ class APIInformation():
             "Hunyuan 1",
             "Hunyuan Video",
             "Ideogram 4.0",
+            "Ideogram 4.5",
             "Boogu",
             "Illustrious",
             "Imagen4",
@@ -339,6 +346,7 @@ class APIInformation():
             "Pony V7",
             "Qwen",
             "Qwen 2",
+            "Qwen 2.1",
             "Qwen 3",
             "Stable Cascade",
             "SD 1.4",
@@ -384,12 +392,16 @@ class APIInformation():
             "Wan Video 3.0",
             "ZImageTurbo",
             "ZImageBase",
+            "Ming Image Design 0.1",
+            "Ming Image Design Layer 0.1",
             "Vidu Q1",
             "MiniMax H3",
             "Kling",
             "Seedance",
             "ACE Audio",
             "MiniMax Music 3",
+            "YuE2",
+            "Sonilo",
             "PolyGen",
             "Tripo",
             "Hunyuan3D",
@@ -398,6 +410,7 @@ class APIInformation():
         ],
         "BaseModelType": ["Standard", "Inpainting", "Refiner", "Pix2Pix"],
     }
+    
     def __init__(self) -> None:
         if APIInformation.typeOptions is None:
             self.getOptions()
@@ -572,6 +585,7 @@ class APIInformation():
             "Most Images",
             "Newest",
             "Oldest",
+            "Recently Added",
         ]
         try:
             # APIInformation.sortOptions = data['error']['issues'][0]['options']

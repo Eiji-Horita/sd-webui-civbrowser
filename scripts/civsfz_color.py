@@ -51,6 +51,7 @@ familyColor: dict = {
         "value": [
             "Anima",
             "Krea 2",
+            "Qwen 2.1",
             "ZImageTurbo",
             "ZImageBase",
         ],
@@ -85,6 +86,7 @@ familyColor: dict = {
     "family5": {
         "value": [
             "Chroma",
+            "Flux.3",
             "Flux 3 Video",
             "Flux.2 Klein 4B-base",
             "Flux.2 Klein 4B",
