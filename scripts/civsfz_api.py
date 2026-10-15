@@ -23,6 +23,7 @@ from scripts.civsfz_shared import (
     read_timeout,
     card_no_preview,
     get_proxies,
+    format_bytes,
 )
 from jinja2 import Environment, FileSystemLoader
 
@@ -228,6 +229,7 @@ class APIInformation():
             "Flux.2 Klein 9B-base",
             "Flux.2 Klein 4B",
             "Flux.2 Klein 4B-base",
+            "Flux.3",
             "Flux 3 Video",
             "Grok",
             "HappyHorse",
@@ -258,6 +260,7 @@ class APIInformation():
             "Pony V7",
             "Qwen",
             "Qwen 2",
+            "Qwen 2.1",
             "Qwen 3",
             "SD 1.4",
             "SD 1.5",
@@ -269,6 +272,7 @@ class APIInformation():
             "SDXL Lightning",
             "SDXL Hyper",
             "Reve",
+            "Muse Image",
             "Wan Video 1.3B t2v",
             "Wan Video 14B t2v",
             "Wan Video 14B i2v 480p",
@@ -280,10 +284,15 @@ class APIInformation():
             "Wan Video 2.5 I2V",
             "Wan Image 2.7",
             "Wan Video 2.7",
+            "Wan Video 3.0",
             "ZImageTurbo",
             "ZImageBase",
+            "Ming Image Design 0.1",
+            "Ming Image Design Layer 0.1",
             "MiniMax H3",
             "ACE Audio",
+            "MiniMax Music 3",
+            "Sonilo",
         ],
         "BaseModel": [
             "Anima",
@@ -300,6 +309,7 @@ class APIInformation():
             "Flux.2 Klein 9B-base",
             "Flux.2 Klein 4B",
             "Flux.2 Klein 4B-base",
+            "Flux.3",
             "Flux 3 Video",
             "Grok",
             "HappyHorse",
@@ -308,6 +318,7 @@ class APIInformation():
             "Hunyuan 1",
             "Hunyuan Video",
             "Ideogram 4.0",
+            "Ideogram 4.5",
             "Boogu",
             "Illustrious",
             "Imagen4",
@@ -335,6 +346,7 @@ class APIInformation():
             "Pony V7",
             "Qwen",
             "Qwen 2",
+            "Qwen 2.1",
             "Qwen 3",
             "Stable Cascade",
             "SD 1.4",
@@ -359,6 +371,7 @@ class APIInformation():
             "SDXL Turbo",
             "SDXL Distilled",
             "Reve",
+            "Muse Image",
             "Seedream",
             "SVD",
             "SVD XT",
@@ -376,19 +389,28 @@ class APIInformation():
             "Wan Video 2.5 I2V",
             "Wan Image 2.7",
             "Wan Video 2.7",
+            "Wan Video 3.0",
             "ZImageTurbo",
             "ZImageBase",
+            "Ming Image Design 0.1",
+            "Ming Image Design Layer 0.1",
             "Vidu Q1",
             "MiniMax H3",
             "Kling",
             "Seedance",
             "ACE Audio",
+            "MiniMax Music 3",
+            "YuE2",
+            "Sonilo",
             "PolyGen",
             "Tripo",
             "Hunyuan3D",
+            "Pixal3D",
+            "Trellis.2",
         ],
         "BaseModelType": ["Standard", "Inpainting", "Refiner", "Pix2Pix"],
     }
+    
     def __init__(self) -> None:
         if APIInformation.typeOptions is None:
             self.getOptions()
@@ -563,6 +585,7 @@ class APIInformation():
             "Most Images",
             "Newest",
             "Oldest",
+            "Recently Added",
         ]
         try:
             # APIInformation.sortOptions = data['error']['issues'][0]['options']
@@ -1048,6 +1071,11 @@ class CivitaiModels(APIInformation):
                 self.requestError = None
                 version_data = self.requestApi(url)
                 if not self.requestError:
+                    # versionApi doesn't return enough metadata
+                    # Override metainfo key to keep metadata for quantType
+                    for i, fileinfo in enumerate(version_data["files"]):
+                        if "metadata" in version["files"][i]:
+                            fileinfo["metadata"] = version["files"][i]["metadata"]
                     item["modelVersions"][versionIndex] = version | version_data
                     version = item["modelVersions"][versionIndex]
                     # print_lc(f"Fetch image metadata by version ID")
@@ -1109,11 +1137,8 @@ class CivitaiModels(APIInformation):
                 choices.append(
                     " | ".join(
                         [f["name"]]
-                        + [
-                            md
-                            for md in f["metadata"].values()
-                            if isinstance(md, str)
-                        ]
+                        + [md for md in f["metadata"].values() if isinstance(md, str)]
+                        + [format_bytes(f["sizeKB"]*1024)]
                     )
                 )
             else:
@@ -1121,6 +1146,7 @@ class CivitaiModels(APIInformation):
                     " | ".join(
                         [f["name"]]
                         + [md for md in f["metadata"].values() if isinstance(md, str)]
+                        + [format_bytes(f["sizeKB"] * 1024)]
                         + [str(version["id"]), str(i)]
                     )
                 )
@@ -1248,7 +1274,9 @@ class CivitaiModels(APIInformation):
         # add meta data
         # if self.getSelectedModelType() == "Checkpoint":
         meta = version["files"][fileIndex]["metadata"]
-        if meta.get("fp"):
+        # print_lc(f"{meta=}")
+        # if meta.get("fp"):
+        if True:
             metainfo = "_".join([f for f in meta.values() if isinstance(f, str)])
             pname = Path(filename)
             filename = pname.stem + "_" + metainfo + pname.suffix

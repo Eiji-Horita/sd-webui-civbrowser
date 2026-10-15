@@ -1,6 +1,6 @@
 import colorsys
+import math
 from scripts.civsfz_shared import opts
-
 
 def hex_color_hsl_to_rgb(h, s, l):
     # param order h,s,l not h,l,s
@@ -45,16 +45,17 @@ familyColor: dict = {
             "SDXL Hyper",
             "SDXL Turbo",
         ],
-        "color": hex_color_hsl_to_rgb(15, 100, 45),
+        "color": hex_color_hsl_to_rgb(350, 80, 50),
     },
     "family2": {
         "value": [
             "Anima",
             "Krea 2",
+            "Qwen 2.1",
             "ZImageTurbo",
             "ZImageBase",
         ],
-        "color": hex_color_hsl_to_rgb(261, 100, 50),
+        "color": hex_color_hsl_to_rgb(260, 80, 50),
     },
     "family3": {
         "value": [
@@ -70,7 +71,7 @@ familyColor: dict = {
             "Wan Video 1.3B t2v",
             "Wan Video",
         ],
-        "color": hex_color_hsl_to_rgb(140, 90, 30),
+        "color": hex_color_hsl_to_rgb(120, 80, 30),
     },
     "family4": {
         "value": [
@@ -80,11 +81,12 @@ familyColor: dict = {
             "LTXV2",
             "LTXV",
         ],
-        "color": hex_color_hsl_to_rgb(300, 90, 45),
+        "color": hex_color_hsl_to_rgb(170, 80, 40),
     },
     "family5": {
         "value": [
             "Chroma",
+            "Flux.3",
             "Flux 3 Video",
             "Flux.2 Klein 4B-base",
             "Flux.2 Klein 4B",
@@ -96,11 +98,11 @@ familyColor: dict = {
             "Flux.1 D",
             "Flux.1 S",
         ],
-        "color": hex_color_hsl_to_rgb(279, 38, 48),
+        "color": hex_color_hsl_to_rgb(320, 80, 50),
     },
     "family6": {
         "value": [],
-        "color": hex_color_hsl_to_rgb(330, 90, 45),
+        "color": hex_color_hsl_to_rgb(290, 80, 50),
     },
     "non_family": {
         "value": [],
@@ -109,12 +111,19 @@ familyColor: dict = {
 }
 
 def autoColorRotate(hexColor: str, num: int, i: int, hue=30, opacity=None):
-    (h, l, s) = hls_from_hex(hexColor)
-    h = h + (hue/(num/3)*(i//4))/360
-    l = l * ((1 - (i % 4) / 5) * 0.6 + 0.4)
-    s = s * 0.5/num*(num-i)+0.5
-    return hex_color_hsl_to_rgba(h, s, l, opacity)
+    h0, l0, s0 = hls_from_hex(hexColor)
+    r = 0.25  # radius of helix
+    p = 2.5  # pitch of helix
+    angle_step = 45.0  # angle step in degrees
+    # angle in degrees
+    angle_deg = i * angle_step
+    angle_rad = math.radians(angle_deg)
+    # point on the circle with radius r from the center in H-S plane
+    h = h0 + (i * p / 360.0)
+    s = s0 * (r * math.cos(angle_rad) + 1.0 - r)
+    l = l0 * (r * math.sin(angle_rad) + 1.0)
 
+    return hex_color_hsl_to_rgba(h, s, l, opacity)
 
 def dictBasemodelColors(listBaseModel: list) -> dict:
     ret = {}
@@ -132,85 +141,3 @@ def dictBasemodelColors(listBaseModel: list) -> dict:
             ret[name] = opts.civsfz_color_non_family
     # print(f"{ret}")
     return ret
-
-#
-# class BaseModelColors:
-#    colors = [
-#        {
-#            "name": "BASE",
-#            "label": "Background color for model names",
-#            "key": "civsfz_background_color_figcaption",
-#            "property": "--civsfz-background-color-figcaption",
-#            "color": hex_color_hsl_to_rgb(225, 15, 30),
-#        },
-#        {
-#            "name": "SD 1",
-#            "label": "Background color for SD1 models",
-#            "key": "civsfz_background_color_sd1",
-#            "property": "--civsfz-background-color-sd1",
-#            "color": hex_color_hsl_to_rgb(90, 70, 30),
-#        },
-#        {
-#            "name": "SD 2",
-#            "label": "Background color for SD2 models",
-#            "key": "civsfz_background_color_sd2",
-#            "property": "--civsfz-background-color-sd2",
-#            "color": hex_color_hsl_to_rgb(90, 60, 40),
-#        },
-#        {
-#            "name": "SD 3",
-#            "label": "Background color for SD3 models",
-#            "key": "civsfz_background_color_sd3",
-#            "property": "--civsfz-background-color-sd3",
-#            "color": hex_color_hsl_to_rgb(135, 70, 30),
-#        },
-#        {
-#            "name": "SD 3.",
-#            "label": "Background color for SD3.5 models",
-#            "key": "civsfz_background_color_sd35",
-#            "property": "--civsfz-background-color-sd35",
-#            "color": hex_color_hsl_to_rgb(150, 80, 40),
-#        },
-#        {
-#            "name": "SDXL",
-#            "label": "Background color for SDXL models",
-#            "key": "civsfz_background_color_sdxl",
-#            "property": "--civsfz-background-color-sdxl",
-#            "color": hex_color_hsl_to_rgb(15, 70, 40),
-#        },
-#        {
-#            "name": "Pony",
-#            "label": "Background color for Pony models",
-#            "key": "civsfz_background_color_pony",
-#            "property": "--civsfz-background-color-pony",
-#            "color": hex_color_hsl_to_rgb(15, 90, 40),
-#        },
-#        {
-#            "name": "Illustrious",
-#            "label": "Background color for Illustrious models",
-#            "key": "civsfz_background_color_illustrious",
-#            "property": "--civsfz-background-color-illustrious",
-#            "color": hex_color_hsl_to_rgb(15, 95, 50),
-#        },
-#        {
-#            "name": "Flux.1",
-#            "label": "Background color for Flux.1 models",
-#            "key": "civsfz_background_color_flux1",
-#            "property": "--civsfz-background-color-flux1",
-#            "color": hex_color_hsl_to_rgb(330, 80, 40),
-#        },
-#    ]
-#
-#    def __init__(self) -> None:
-#        pass
-#
-#    # for macros.jinja
-#    def name_property_dict(self):
-#        ret = {}
-#        for d in self.colors:
-#            ret[d["name"]] = d["property"]
-#        # reverse order for sd3.5
-#        return dict(reversed(list(ret.items())))
-#
-#
-# print(f"{BaseModelColors().name_property_dict()}")

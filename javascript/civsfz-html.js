@@ -265,7 +265,7 @@ function civsfz_scroll_to(q, offset = -50) {
 	}
 }
 
-function civsfz_preview_colors() {
+function _civsfz_preview_colors() {
 	for (var i = 1; i <= 10; i++) {
 		let elmDropdwn = gradioApp().querySelector('#setting_civsfz_family' + i.toString(10));
 		if (elmDropdwn == null) { break; }
@@ -282,6 +282,35 @@ function civsfz_preview_colors() {
 				let l_param = (1 - j % 4 / 5)* 0.6 + 0.4;
 				let s_param = 0.5/len*(len-j) + 0.5;
 				token.style.setProperty("background",`hsl(from ${color} calc(h + ${h_param}) calc(s*${s_param}) calc(l*${l_param})`);
+			} else {
+				token.style.removeProperty("background");
+			}
+		}
+	}
+}
+function civsfz_preview_colors() {
+	for (var i = 1; i <= 10; i++) {
+		let elmDropdwn = gradioApp().querySelector('#setting_civsfz_family' + i.toString(10));
+		if (elmDropdwn == null) { break; }
+		let elmColor = gradioApp().querySelector('#setting_civsfz_color_family' + i.toString(10));
+		let color = elmColor.querySelector("input").value;
+		//console.log(color);
+		let tokens = elmDropdwn.getElementsByClassName("token");
+		let len = tokens.length;
+		let hasBg = len > 0 ? tokens[0].style.getPropertyValue("background") : false;
+		let r = 0.25;  // radius of helix
+		let p = 2.5;  // DEG. pitch of helix
+		let angle_step = 45.0;  // angle step in degrees
+		for (let j = 0; j < tokens.length; j++) {
+			let token = tokens[j];
+			if (!hasBg) {
+				let angle_deg = j * angle_step;
+				let angle_rad = angle_deg * (Math.PI / 180.0);
+				let h = j * p;
+				let s = r * Math.cos(angle_rad) + 1.0 - r;
+				let l = r * Math.sin(angle_rad) + 1.0;
+				// console.log(h,s,l);
+				token.style.setProperty("background", `hsl(from ${color} calc(h + ${h}) calc(s * ${s}) calc(l * ${l})`);
 			} else {
 				token.style.removeProperty("background");
 			}
